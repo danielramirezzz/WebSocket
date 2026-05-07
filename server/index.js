@@ -11,20 +11,22 @@ const io = new Server(server, {
         origin: "*"
     }
 })
-
+const mensajes =[]
 io.on("connection", (socket) => {
     console.log("Usuario conectado")
 
 
-    socket.emit("message", "Holi Uwu")
+    socket.emit("message", ["Holi Uwu"])
 
     socket.on("message", (message) => {
 
         //io.emit = Envia a todos incluido a uno mismo
         //socket.emit => Envái solo al socket/persona conectada
         //socket.broadcast.emit => Envia a todos menos a uno mismo
+        //console.log(message)
+        mensajes.push(message)
         socket.emit("confirmation", "Mensaje enviado")
-        socket.broadcast.emit("message", "Enviaron esto: " + message)
+        socket.broadcast.emit("message", mensajes)
     })
 })
 
