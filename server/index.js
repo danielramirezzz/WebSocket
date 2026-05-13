@@ -1,43 +1,39 @@
-const express = require("express")
-const { createServer }  = require("node:http")
-const { Server } = require("socket.io")
-const cors = require("cors")
+const express = require("express");
+const { createServer } = require("node:http");
+const { Server } = require("socket.io");
+const cors = require("cors");
 
-const app = express()
-const server = createServer(app)
+const app = express();
+app.use(cors());
 
+const server = createServer(app);
 const io = new Server(server, {
-    cors:{
-        origin: "*"
+    cors: {
+        origin: "*",
     }
-})
-const mensajes =[]
+});
+
+const mensajes = [];
+
 io.on("connection", (socket) => {
-    console.log("Usuario conectado")
+    console.log("Nuevo usuario conectado");
 
+    
+    socket.emit("message", mensajes);
 
-    socket.emit("message", ["Holi Uwu"])
+    socket.on("message", (data) => {
+        const newMessage = {
+            user: data.user,
+            text: data.inputMessage,
+            // Generamos la hora en el servidor
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
 
-    socket.on("message", (message) => {
-
-        //io.emit = Envia a todos incluido a uno mismo
-        //socket.emit => Envái solo al socket/persona conectada
-        //socket.broadcast.emit => Envia a todos menos a uno mismo
-        //console.log(message)
-        mensajes.push(message)
-        socket.emit("confirmation", "Mensaje enviado")
-        socket.broadcast.emit("message", mensajes)
-    })
-})
-
-
-
-app.get("/", (req, res) => {
-    res.send("Hello world")
-})
-
-
+        mensajes.push(newMessage);
+        io.emit("message", mensajes);
+    });
+});
 
 server.listen(3000, () => {
-    console.log("Estoy corriendo")
-})
+    console.log("Servidor corriendo en http://localhost:3000");
+});
